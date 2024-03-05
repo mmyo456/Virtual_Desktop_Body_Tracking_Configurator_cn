@@ -9,14 +9,16 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Virtual Desktop虚拟Tracker配置器 mmyo456")
+        self.setWindowTitle("Virtual Desktop虚拟Tracker配置器 Github:mmyo456")
         
         for proc in psutil.process_iter(['name']):
             if "vrserver.exe" in proc.info['name'].lower():
                 dlg2 = QMessageBox()
-                dlg2.setWindowTitle("Virtual Desktop虚拟Tracker配置器")            
-                dlg2.setText("错误！\n\nvrserver.exe 正在运行！\n\n请关闭 SteamVR 并重试")
+                dlg2.setWindowTitle("Virtual Desktop虚拟Tracker配置器 Github:mmyo456")            
+                dlg2.setText("错误!\n\nvrserver.exe 正在运行！\n\n请关闭 SteamVR 并重试")
+
                 dlg2.exec()
+
                 if QMessageBox.StandardButton.Ok:
                     exit()
         
@@ -51,8 +53,11 @@ class MainWindow(QMainWindow):
             button = QCheckBox(variable.replace("_", " ").title())
             button.setCheckable(True)
             button.setChecked(default_toggles.get(variable))
+            
             self.misc[variable] = button
+            
             layoutTab3.addWidget(button)
+            
             
         for variable in default_misc:
             box = QDoubleSpinBox()
@@ -62,7 +67,9 @@ class MainWindow(QMainWindow):
             box.setSingleStep(0.05)
             box.setDecimals(3)
             box.setValue(default_misc[variable])
+
             self.misc[variable] = box
+
             layoutTab3.addWidget(box)      
 
         spacer = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
@@ -125,7 +132,32 @@ class MainWindow(QMainWindow):
         row = 3
         column = 0
         for variable in default_enabled:
-            button = QCheckBox(variable[:-8].replace("_", " ").title())
+            Chinese = (variable[:-8].replace("_", " ").title())
+            Chinese = (Chinese.replace("Joint", " 关节点"))
+            Chinese = (Chinese.replace("Left", "左"))
+            Chinese = (Chinese.replace("Right", "右"))
+            Chinese = (Chinese.replace("Upper", "上侧"))
+            Chinese = (Chinese.replace("Middle", "中部"))
+            Chinese = (Chinese.replace("Lower", "下侧"))
+            Chinese = (Chinese.replace("Head", "头部"))
+            Chinese = (Chinese.replace("Neck", "颈部"))
+            Chinese = (Chinese.replace("Chest", "胸部"))
+            Chinese = (Chinese.replace("Spine", "脊柱"))
+            Chinese = (Chinese.replace("Hips", "臀部"))
+            Chinese = (Chinese.replace("Shoulder", "肩"))
+            Chinese = (Chinese.replace("Scapula", "肩胛骨"))
+            Chinese = (Chinese.replace("Arm", "手臂"))
+            Chinese = (Chinese.replace("Wrist", "腕"))
+            Chinese = (Chinese.replace("Twist", "扭转"))
+            Chinese = (Chinese.replace("Hand", "手"))
+            Chinese = (Chinese.replace("Leg", "腿"))
+            Chinese = (Chinese.replace("Ankle", "踝"))
+            Chinese = (Chinese.replace("Foot", "脚"))
+            Chinese = (Chinese.replace("Subtalar", "底面"))
+            Chinese = (Chinese.replace("Transverse", "横向"))
+            Chinese = (Chinese.replace("Ball", "球节"))
+            Chinese = (Chinese.replace(" ", ""))
+            button = QCheckBox(Chinese)
             button.setCheckable(True)
             button.setChecked(default_enabled.get(variable))
             button.setToolTip(tooltips_enabled[variable])
@@ -271,7 +303,7 @@ class MainWindow(QMainWindow):
                 ()
             else:
                 dlg2 = QMessageBox()
-                dlg2.setWindowTitle("虚拟桌面身体跟踪配置器")            
+                dlg2.setWindowTitle("Virtual Desktop虚拟Tracker配置器 mmyo456")            
                 dlg2.setText(f"错误：{e}")
                 dlg2.exec()
                 if QMessageBox.StandardButton.Ok:
@@ -281,9 +313,11 @@ class MainWindow(QMainWindow):
         for proc in psutil.process_iter(['name']):
             if "vrserver.exe" in proc.info['name'].lower():
                 dlg2 = QMessageBox()
-                dlg2.setWindowTitle("虚拟桌面身体跟踪配置器")            
-                dlg2.setText("错误！\n\nvrserver.exe 正在运行！\n\n请关闭 SteamVR 并重试")
+                dlg2.setWindowTitle("Virtual Desktop虚拟Tracker配置器 mmyo456")            
+                dlg2.setText("错误!\n\nvrserver.exe 正在运行！\n\n请关闭 SteamVR 并重试")
+                
                 dlg2.exec()
+                
                 if QMessageBox.StandardButton.Ok:
                     exit()
         
@@ -377,4 +411,3 @@ window = MainWindow()
 window.show()
 
 app.exec()
-
