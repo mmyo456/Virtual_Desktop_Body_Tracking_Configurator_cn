@@ -18,4 +18,4 @@ Fork自https://github.com/DenTechs/Virtual_Desktop_Body_Tracking_Configurator
 3.选择需要启用的虚拟追踪器位置。<br>
 [![3](https://github.com/mmyo456/Virtual_Desktop_Body_Tracking_Configurator_cn/blob/main/assets/guide3.png)<br>](https://cdn.jsdelivr.net/gh/mmyo456/Virtual_Desktop_Body_Tracking_Configurator_cn@main/assets/guide3.png)
 4.点击“应用设置（所有页面）”将配置写入SteamVR的配置文件。<br>
-[![4](https://github.com/mmyo456/Virtual_Desktop_Body_Tracking_Configurator_cn/blob/main/assets/guide4.png)<br>](https://cdn.jsdelivr.net/gh/mmyo456/Virtual_Desktop_Body_Tracking_Configurator_cn@main/assets/guide4.png)https://cdn.jsdelivr.net/gh/mmyo456/Virtual_Desktop_Body_Tracking_Configurator_cn@main/assets/guide4.png
+[[![4](https://github.com/mmyo456/Virtual_Desktop_Body_Tracking_Configurator_cn/blob/main/assets/guide4.png)<br>](https://cdn.jsdelivr.net/gh/mmyo456/Virtual_Desktop_Body_Tracking_Configurator_cn@main/assets/guide4.png)
