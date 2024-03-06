@@ -1,8 +1,8 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QCheckBox, QGridLayout, QComboBox, QDoubleSpinBox, QTabWidget, QSpacerItem, QSizePolicy, QMessageBox, QStackedWidget
 import json
 import psutil
-import winreg
 import qdarktheme
+import os
 from iobt_options import default_enabled, default_offsets, default_toggles, default_misc, temp_offsets, tooltips_enabled
 
 class MainWindow(QMainWindow):
@@ -24,12 +24,8 @@ class MainWindow(QMainWindow):
         
         self.steam = ""
         try:
-            location = winreg.HKEY_LOCAL_MACHINE
-            path = winreg.OpenKeyEx(location, r"SOFTWARE\Wow6432Node\Valve\Steam")
-            self.steam = winreg.QueryValueEx(path, "InstallPath")[0]
-            self.steam = self.steam.replace("\\","/")
-            if path:
-                winreg.CloseKey(path)
+            with open(f"{os.getenv('LOCALAPPDATA')}\\openvr\\openvrpaths.vrpath", "r") as file:
+                self.steam = json.load(file)["config"][0].replace("\\", "/")
         except Exception as e:
             dlg2 = QMessageBox()
             dlg2.setWindowTitle("Virtual Desktop虚拟Tracker配置器")            
@@ -267,7 +263,7 @@ class MainWindow(QMainWindow):
 
     def load_settings_clicked(self):
         try:
-            with open(f"{self.steam}/config/steamvr.vrsettings", "r") as file:
+            with open(f"{self.steam}/steamvr.vrsettings", "r") as file:
                 current = json.load(file)["driver_VirtualDesktop"]                  
                 
                 for variable in default_enabled:
@@ -365,18 +361,18 @@ class MainWindow(QMainWindow):
                 ()
            
         try:   
-            with open(f"{self.steam}/config/steamvr.vrsettings", "r+") as settings:
+            with open(f"{self.steam}/steamvr.vrsettings", "r+") as settings:
                 
                 temp = json.load(settings)
                 try:
-                    with open(f"{self.steam}/config/steamvr.vrsettings.originalbackup", "x") as backup:
+                    with open(f"{self.steam}/steamvr.vrsettings.originalbackup", "x") as backup:
                         json.dump(temp, fp=backup)
                         backup.close()
                 except:
                     ()
                 
                 try:
-                    with open(f"{self.steam}/config/steamvr.vrsettings.lastbackup", "w") as backup:
+                    with open(f"{self.steam}/steamvr.vrsettings.lastbackup", "w") as backup:
                         json.dump(temp, fp=backup)
                         backup.close()
                 except:
@@ -390,7 +386,7 @@ class MainWindow(QMainWindow):
                 
                 dlg = QMessageBox(self)
                 dlg.setWindowTitle("Virtual Desktop虚拟Tracker配置器")            
-                dlg.setText(f"成功导出到 SteamVR！\n\n原始设置备份保存在：{self.steam}/config/steamvr.vrsettings.originalbackup\n\n之前设置的备份保存在：{self.steam}/config/steamvr.vrsettings.lastbackup")
+                dlg.setText(f"成功导出到 SteamVR！\n\n原始设置备份保存在：{self.steam}/steamvr.vrsettings.originalbackup\n\n之前设置的备份保存在： {self.steam}/steamvr.vrsettings.lastbackup")
                 dlg.exec()
                 if QMessageBox.StandardButton.Ok:
                     app.exit()
