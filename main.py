@@ -4,6 +4,18 @@ import psutil
 import qdarktheme
 import os
 from iobt_options import default_enabled, default_offsets, default_toggles, default_misc, temp_offsets, tooltips_enabled
+import subprocess
+
+
+def process_exists(process_name):
+    call = 'TASKLIST', '/FI', 'imagename eq %s' % process_name
+    # use buildin check_output right away
+    output = subprocess.check_output(call, shell=True, encoding='cp1252')
+    # check in last line for process name
+    last_line = output.strip().split('\r\n')[-1]
+    # because Fail message could be translated
+    return last_line.lower().startswith(process_name.lower())
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -11,16 +23,13 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("Virtual Desktop虚拟Tracker配置器 Github:mmyo456")
         
-        for proc in psutil.process_iter(['name']):
-            if "vrserver.exe" in proc.info['name'].lower():
-                dlg2 = QMessageBox()
-                dlg2.setWindowTitle("Virtual Desktop虚拟Tracker配置器 Github:mmyo456")            
-                dlg2.setText("错误!\n\nvrserver.exe 正在运行！\n\n请关闭 SteamVR 并重试")
-
-                dlg2.exec()
-
-                if QMessageBox.StandardButton.Ok:
-                    exit()
+        if process_exists("vrserver.exe"):
+            dlg2 = QMessageBox()
+            dlg2.setWindowTitle("Virtual Desktop Body Tracking Configurator")            
+            dlg2.setText("错误!\n\nvrserver.exe 正在运行！\n\n请关闭 SteamVR，然后重试")
+            dlg2.exec()
+            if QMessageBox.StandardButton.Ok:
+                exit()
         
         self.steam = ""
         try:
@@ -306,16 +315,13 @@ class MainWindow(QMainWindow):
                     exit()
         
     def export_clicked(self):
-        for proc in psutil.process_iter(['name']):
-            if "vrserver.exe" in proc.info['name'].lower():
-                dlg2 = QMessageBox()
-                dlg2.setWindowTitle("Virtual Desktop虚拟Tracker配置器 mmyo456")            
-                dlg2.setText("错误!\n\nvrserver.exe 正在运行！\n\n请关闭 SteamVR 并重试")
-                
-                dlg2.exec()
-                
-                if QMessageBox.StandardButton.Ok:
-                    exit()
+        if process_exists("vrserver.exe"):
+            dlg2 = QMessageBox()
+            dlg2.setWindowTitle("Virtual Desktop Body Tracking Configurator")            
+            dlg2.setText("错误!\n\nvrserver.exe 正在运行！\n\n请关闭 SteamVR，然后重试")
+            dlg2.exec()
+            if QMessageBox.StandardButton.Ok:
+                exit()
         
         export_dict = {}
 
