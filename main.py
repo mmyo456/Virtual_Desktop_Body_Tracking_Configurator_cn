@@ -1,16 +1,19 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QCheckBox, QGridLayout, QComboBox, QDoubleSpinBox, QTabWidget, QSpacerItem, QSizePolicy, QMessageBox, QStackedWidget
 import json
-import psutil
 import qdarktheme
 import os
 from iobt_options import default_enabled, default_offsets, default_toggles, default_misc, temp_offsets, tooltips_enabled
 import subprocess
+import psutil
 
 
 def process_exists(process_name):
     call = 'TASKLIST', '/FI', 'imagename eq %s' % process_name
     # use buildin check_output right away
-    output = subprocess.check_output(call, shell=True, encoding='cp1252')
+    try:
+        output = subprocess.check_output(call).decode(errors='ignore')
+    except UnicodeDecodeError:
+        output = subprocess.check_output(call).decode('cp1252', errors='ignore')  # Windows specific encoding
     # check in last line for process name
     last_line = output.strip().split('\r\n')[-1]
     # because Fail message could be translated
@@ -23,17 +26,20 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("Virtual Desktop虚拟Tracker配置器 Github:mmyo456")
         
-        if process_exists("vrserver.exe"):
-            dlg2 = QMessageBox()
-            dlg2.setWindowTitle("Virtual Desktop Body Tracking Configurator")            
-            dlg2.setText("错误!\n\nvrserver.exe 正在运行！\n\n请关闭 SteamVR，然后重试")
-            dlg2.exec()
-            if QMessageBox.StandardButton.Ok:
-                exit()
+        for proc in psutil.process_iter(['name']):
+            if "vrserver.exe" in proc.info['name'].lower():
+                dlg2 = QMessageBox()
+                dlg2.setWindowTitle("Virtual Desktop虚拟Tracker配置器 Github:mmyo456")            
+                dlg2.setText("错误!\n\nvrserver.exe 正在运行！\n\n请关闭 SteamVR 并重试")
+
+                dlg2.exec()
+
+                if QMessageBox.StandardButton.Ok:
+                    exit()
         
         self.steam = ""
         try:
-            with open(f"{os.getenv('LOCALAPPDATA')}\\openvr\\openvrpaths.vrpath", "r") as file:
+            with open(f"{os.getenv('LOCALAPPDATA')}\\openvr\\openvrpaths.vrpath", "r", encoding="utf-8") as file:
                 self.steam = json.load(file)["config"][0].replace("\\", "/")
         except Exception as e:
             dlg2 = QMessageBox()
@@ -272,7 +278,7 @@ class MainWindow(QMainWindow):
 
     def load_settings_clicked(self):
         try:
-            with open(f"{self.steam}/steamvr.vrsettings", "r") as file:
+            with open(f"{self.steam}/steamvr.vrsettings", "r", encoding="utf-8") as file:
                 current = json.load(file)["driver_VirtualDesktop"]                  
                 
                 for variable in default_enabled:
@@ -315,13 +321,16 @@ class MainWindow(QMainWindow):
                     exit()
         
     def export_clicked(self):
-        if process_exists("vrserver.exe"):
-            dlg2 = QMessageBox()
-            dlg2.setWindowTitle("Virtual Desktop Body Tracking Configurator")            
-            dlg2.setText("错误!\n\nvrserver.exe 正在运行！\n\n请关闭 SteamVR，然后重试")
-            dlg2.exec()
-            if QMessageBox.StandardButton.Ok:
-                exit()
+        for proc in psutil.process_iter(['name']):
+            if "vrserver.exe" in proc.info['name'].lower():
+                dlg2 = QMessageBox()
+                dlg2.setWindowTitle("Virtual Desktop虚拟Tracker配置器 mmyo456")            
+                dlg2.setText("错误!\n\nvrserver.exe 正在运行！\n\n请关闭 SteamVR 并重试")
+                
+                dlg2.exec()
+                
+                if QMessageBox.StandardButton.Ok:
+                    exit()
         
         export_dict = {}
 
@@ -367,11 +376,11 @@ class MainWindow(QMainWindow):
                 ()
            
         try:   
-            with open(f"{self.steam}/steamvr.vrsettings", "r+") as settings:
+            with open(f"{self.steam}/steamvr.vrsettings", "r+", encoding="utf-8") as settings:
                 
                 temp = json.load(settings)
                 try:
-                    with open(f"{self.steam}/steamvr.vrsettings.originalbackup", "x") as backup:
+                    with open(f"{self.steam}/steamvr.vrsettings.originalbackup", "x", encoding="utf-8") as backup:
                         json.dump(temp, fp=backup)
                         backup.close()
                 except:
