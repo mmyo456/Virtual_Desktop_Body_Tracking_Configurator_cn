@@ -26,16 +26,15 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("Virtual Desktop虚拟Tracker配置器 Github:mmyo456")
         
-        for proc in psutil.process_iter(['name']):
-            if "vrserver.exe" in proc.info['name'].lower():
-                dlg2 = QMessageBox()
-                dlg2.setWindowTitle("Virtual Desktop虚拟Tracker配置器 Github:mmyo456")            
-                dlg2.setText("错误!\n\nvrserver.exe 正在运行！\n\n请关闭 SteamVR 并重试")
+        if "vrserver.exe" in (p.name() for p in psutil.process_iter()):
+            dlg2 = QMessageBox()
+            dlg2.setWindowTitle("Virtual Desktop虚拟Tracker配置器 Github:mmyo456")            
+            dlg2.setText("错误!\n\nvrserver.exe 正在运行！\n\n请关闭 SteamVR 再试一次")
 
-                dlg2.exec()
+            dlg2.exec()
 
-                if QMessageBox.StandardButton.Ok:
-                    exit()
+            if QMessageBox.StandardButton.Ok:
+                exit()
         
         self.steam = ""
         try:
@@ -63,9 +62,8 @@ class MainWindow(QMainWindow):
         for variable in default_toggles:
             button = QCheckBox(variable.replace("_", " ").title())
             button.setCheckable(True)
-            button.setChecked(default_toggles.get(variable))
-            
-            self.misc[variable] = button
+            button.setChecked(default_toggles.get(variable))     
+            self.misc[variable] = button      
             
             layoutTab3.addWidget(button)
             
@@ -77,8 +75,7 @@ class MainWindow(QMainWindow):
             box.setMaximum(1)
             box.setSingleStep(0.05)
             box.setDecimals(3)
-            box.setValue(default_misc[variable])
-
+            box.setValue(default_misc[variable])            
             self.misc[variable] = box
 
             layoutTab3.addWidget(box)      
@@ -321,16 +318,15 @@ class MainWindow(QMainWindow):
                     exit()
         
     def export_clicked(self):
-        for proc in psutil.process_iter(['name']):
-            if "vrserver.exe" in proc.info['name'].lower():
-                dlg2 = QMessageBox()
-                dlg2.setWindowTitle("Virtual Desktop虚拟Tracker配置器 mmyo456")            
-                dlg2.setText("错误!\n\nvrserver.exe 正在运行！\n\n请关闭 SteamVR 并重试")
-                
-                dlg2.exec()
-                
-                if QMessageBox.StandardButton.Ok:
-                    exit()
+        if "vrserver.exe" in (p.name() for p in psutil.process_iter()):
+            dlg2 = QMessageBox()
+            dlg2.setWindowTitle("Virtual Desktop虚拟Tracker配置器 Github:mmyo456")            
+            dlg2.setText("错误!\n\nvrserver.exe 正在运行！\n\n请关闭 SteamVR 再试一次")
+
+            dlg2.exec()
+
+            if QMessageBox.StandardButton.Ok:
+                exit()
         
         export_dict = {}
 
