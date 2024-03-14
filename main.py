@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPu
 import json
 import qdarktheme
 import os
-from iobt_options import default_enabled, default_offsets, default_toggles, default_misc, temp_offsets, tooltips_enabled
+from iobt_options import default_enabled, default_offsets, default_misc_toggles, default_misc, tooltips_enabled, tooltips_misc_toggles, tooltips_misc
 import subprocess
 import psutil
 
@@ -24,7 +24,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Virtual Desktop虚拟Tracker配置器 Github:mmyo456")
+        self.setWindowTitle("Virtual Desktop虚拟Tracker配置器 Github:mmyo456 v1.7C")
         
         if "vrserver.exe" in (p.name() for p in psutil.process_iter()):
             dlg2 = QMessageBox()
@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
         
         self.steam = ""
         try:
-            with open(f"{os.getenv('LOCALAPPDATA')}\\openvr\\openvrpaths.vrpath", "r", encoding="utf-8") as file:
+            with open(f"{os.getenv('LOCALAPPDATA')}\\openvr\\openvrpaths.vrpath", "r", encoding="utf-8", errors='ignore') as file:
                 self.steam = json.load(file)["config"][0].replace("\\", "/")
         except Exception as e:
             dlg2 = QMessageBox()
@@ -52,6 +52,8 @@ class MainWindow(QMainWindow):
         self.offsets = {}   
         self.misc = {}
         self.stackedwidgets = {}
+
+        self.miscOpened = False
         
         layoutTab1 = QGridLayout()
         self.layoutTab2 = QGridLayout()
@@ -59,10 +61,11 @@ class MainWindow(QMainWindow):
         layoutTab3 = QVBoxLayout()
 
 
-        for variable in default_toggles:
+        for variable in default_misc_toggles:
             button = QCheckBox(variable.replace("_", " ").title())
             button.setCheckable(True)
-            button.setChecked(default_toggles.get(variable))     
+            button.setChecked(default_misc_toggles.get(variable))
+            button.setToolTip(tooltips_misc_toggles[variable])   
             self.misc[variable] = button      
             
             layoutTab3.addWidget(button)
@@ -75,7 +78,8 @@ class MainWindow(QMainWindow):
             box.setMaximum(1)
             box.setSingleStep(0.05)
             box.setDecimals(3)
-            box.setValue(default_misc[variable])            
+            box.setValue(default_misc[variable])   
+            box.setToolTip(tooltips_misc[variable])         
             self.misc[variable] = box
 
             layoutTab3.addWidget(box)      
@@ -89,52 +93,55 @@ class MainWindow(QMainWindow):
         self.layoutTab2.addItem(spacer2,0, 1)
         
         self.upperWithHip = QPushButton("上半身（带臀部）")
+        self.upperWithHip.setStyleSheet("QPushButton {background-color: rgb(180,230,255); color: black} QPushButton:hover {background-color: rgb(150,200,235)}")
         self.upperWithHip.clicked.connect(self.Upper_With_Hip_clicked)
         layoutTab1.addWidget(self.upperWithHip, 0, 0)
         
         self.upper = QPushButton("仅上半身")
+        self.upper.setStyleSheet("QPushButton {background-color: rgb(180,230,255); color: black} QPushButton:hover {background-color: rgb(150,200,235)}")
         self.upper.clicked.connect(self.upper_only_clicked)
         layoutTab1.addWidget(self.upper, 0, 1)
         
         self.elbows = QPushButton("仅肘部")
+        self.elbows.setStyleSheet("QPushButton {background-color: rgb(180,230,255); color: black} QPushButton:hover {background-color: rgb(150,200,235)}")
         self.elbows.clicked.connect(self.elbows_only_clicked)
         layoutTab1.addWidget(self.elbows, 0, 2)
         
         self.defaults = QPushButton("重置已启用追踪器为默认设置")
+        self.defaults.setStyleSheet("QPushButton {background-color: rgb(100,200,255); color: black} QPushButton:hover {background-color: rgb(70,150,230)}")
         self.defaults.clicked.connect(self.reset_clicked)
         layoutTab1.addWidget(self.defaults, 17, 0)
 
         self.load = QPushButton("加载当前设置")
+        self.load.setStyleSheet("QPushButton {background-color: rgb(140,220,255); color: black} QPushButton:hover {background-color: rgb(130,190,235)}")
         self.load.clicked.connect(self.load_settings_clicked)
         layoutTab1.addWidget(self.load, 17, 1)
 
         self.load2 = QPushButton("加载当前设置")
+        self.load2.setStyleSheet("QPushButton {background-color: rgb(140,220,255); color: black} QPushButton:hover {background-color: rgb(130,190,235)}")
         self.load2.clicked.connect(self.load_settings_clicked)
-        self.layoutTab2.addWidget(self.load2, 4, 0)
+        self.layoutTab2.addWidget(self.load2, 3, 0)
 
         self.load3 = QPushButton("加载当前设置")
+        self.load3.setStyleSheet("QPushButton {background-color: rgb(140,220,255); color: black} QPushButton:hover {background-color: rgb(130,190,235)}")
         self.load3.clicked.connect(self.load_settings_clicked)
         layoutTab3.addWidget(self.load3)
         
         self.export = QPushButton("应用设置（所有页面）")
-        self.export.setStyleSheet("QPushButton {background-color: rgb(0,200,0); color: black} QPushButton:hover {background-color: rgb(0,200,150)}")
+        self.export.setStyleSheet("QPushButton {background-color: rgb(60,250,60); color: black} QPushButton:hover {background-color: rgb(0,200,150)}")
         self.export.clicked.connect(self.export_clicked)
         layoutTab1.addWidget(self.export, 17, 2)
         
         self.export2 = QPushButton("应用设置（所有页面）")
-        self.export2.setStyleSheet("QPushButton {background-color: rgb(0,200,0); color: black} QPushButton:hover {background-color: rgb(0,200,150)}")
+        self.export2.setStyleSheet("QPushButton {background-color: rgb(60,250,60); color: black} QPushButton:hover {background-color: rgb(0,200,150)}")
         self.export2.clicked.connect(self.export_clicked)
-        self.layoutTab2.addWidget(self.export2, 5, 0)
+        self.layoutTab2.addWidget(self.export2, 4, 0)
         
         self.export3 = QPushButton("应用设置（所有页面）")
-        self.export3.setStyleSheet("QPushButton {background-color: rgb(0,200,0); color: black} QPushButton:hover {background-color: rgb(0,200,150)}")
+        self.export3.setStyleSheet("QPushButton {background-color: rgb(60,250,60); color: black} QPushButton:hover {background-color: rgb(0,200,150)}")
         self.export3.clicked.connect(self.export_clicked)
         layoutTab3.addWidget(self.export3, 10)
         
-        self.loadRecommended = QCheckBox("应用推荐偏移\n（不覆盖自定义偏移）")
-        self.loadRecommended.setChecked(True)
-        self.loadRecommended.clicked.connect(self.checkbox_interacted)
-        self.layoutTab2.addWidget(self.loadRecommended, 3, 0)
         
         first = 0
         row = 3
@@ -198,15 +205,13 @@ class MainWindow(QMainWindow):
                     box.setMaximum(360)
                     box.setMinimum(-360)
                     box.setSingleStep(90)
-                    try:
-                        box.setValue(default_offsets[f"{variable[:-8]}_rot_{axis[-1].lower()}"])
-                    except:
-                        ()
+                    box.setValue(default_offsets[f"{variable[:-8]}_rot_{axis[-1].lower()}"])
                 else:
                     box.setSingleStep(0.01)
                     box.setMaximum(1)
                     box.setMinimum(-1)
-                    box.setDecimals(3)                    
+                    box.setDecimals(3)  
+                    box.setValue(default_offsets[f"{variable[:-8]}_offset_{axis[-1].lower()}"])                   
                 self.offsets[variable][axis] = box
                 self.stackedwidgets[axis].addWidget(box)
                 row += 1
@@ -229,6 +234,7 @@ class MainWindow(QMainWindow):
         widgetTab3.setLayout(layoutTab3)
 
         tabs = QTabWidget()
+        tabs.currentChanged.connect(self.tabChanged)
         tabs.setTabPosition(QTabWidget.TabPosition.North)
         tabs.setMovable(True)
 
@@ -237,6 +243,15 @@ class MainWindow(QMainWindow):
         tabs.addTab(widgetTab3, "其他设置")
 
         self.setCentralWidget(tabs)
+
+        
+    def tabChanged(self, index: int):
+        if not self.miscOpened and index == 2:
+            dlg3 = QMessageBox()
+            dlg3.setWindowTitle("Virtual Desktop虚拟Tracker配置器 Github:mmyo456")            
+            dlg3.setText(f"如果不了解其他选项，请勿修改！")
+            dlg3.exec()
+            self.miscOpened = True 
           
     def offset_index_changed(self, index):
         i=1
@@ -275,7 +290,7 @@ class MainWindow(QMainWindow):
 
     def load_settings_clicked(self):
         try:
-            with open(f"{self.steam}/steamvr.vrsettings", "r", encoding="utf-8") as file:
+            with open(f"{self.steam}/steamvr.vrsettings", "r", encoding="utf-8", errors='ignore') as file:
                 current = json.load(file)["driver_VirtualDesktop"]                  
                 
                 for variable in default_enabled:
@@ -300,7 +315,7 @@ class MainWindow(QMainWindow):
                     except:
                         ()
 
-                for variable in default_toggles:
+                for variable in default_misc_toggles:
                     try:
                         self.misc[variable].setChecked(current[variable])
                     except:
@@ -330,9 +345,6 @@ class MainWindow(QMainWindow):
         
         export_dict = {}
 
-        if self.loadRecommended.isChecked():
-            for variable in temp_offsets:
-                export_dict[variable] = temp_offsets[variable]
                 
         for variable, checkbox in self.checkboxes.items():
            if default_enabled[variable] != checkbox.isChecked():
@@ -366,24 +378,24 @@ class MainWindow(QMainWindow):
             except:
                 ()
             try:
-                if default_toggles[variable] != input.isChecked():
+                if default_misc_toggles[variable] != input.isChecked():
                     export_dict[variable] = input.isChecked()
             except:
                 ()
            
         try:   
-            with open(f"{self.steam}/steamvr.vrsettings", "r+", encoding="utf-8") as settings:
+            with open(f"{self.steam}/steamvr.vrsettings", "r+", encoding="utf-8", errors='ignore') as settings:
                 
                 temp = json.load(settings)
                 try:
-                    with open(f"{self.steam}/steamvr.vrsettings.originalbackup", "x", encoding="utf-8") as backup:
+                    with open(f"{self.steam}/steamvr.vrsettings.originalbackup", "x", encoding="utf-8", errors='ignore') as backup:
                         json.dump(temp, fp=backup)
                         backup.close()
                 except:
                     ()
                 
                 try:
-                    with open(f"{self.steam}/steamvr.vrsettings.lastbackup", "w") as backup:
+                    with open(f"{self.steam}/steamvr.vrsettings.lastbackup", "w", encoding="utf-8", errors='ignore') as backup:
                         json.dump(temp, fp=backup)
                         backup.close()
                 except:
