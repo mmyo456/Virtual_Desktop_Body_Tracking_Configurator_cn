@@ -24,7 +24,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Virtual Desktop虚拟Tracker配置器 Github:mmyo456 v1.7C")
+        self.setWindowTitle("Virtual Desktop虚拟Tracker配置器 Github:mmyo456 v1.8C")
         
         if "vrserver.exe" in (p.name() for p in psutil.process_iter()):
             dlg2 = QMessageBox()
@@ -76,6 +76,8 @@ class MainWindow(QMainWindow):
             box.setPrefix(f"{variable.replace('_', ' ').title()}: ")
             box.setMinimum(0)
             box.setMaximum(1)
+            if variable == "hand_data_debounce_time":
+                box.setMaximum(5)    
             box.setSingleStep(0.05)
             box.setDecimals(3)
             box.setValue(default_misc[variable])   
