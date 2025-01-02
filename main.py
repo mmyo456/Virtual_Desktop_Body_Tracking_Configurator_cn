@@ -1,9 +1,11 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QCheckBox, QGridLayout, QComboBox, QDoubleSpinBox, QTabWidget, QSpacerItem, QSizePolicy, QMessageBox, QStackedWidget
 import json
-from iobt_options import default_enabled, default_offsets, default_misc_toggles, default_misc, tooltips_enabled, tooltips_misc_toggles, tooltips_misc
 import qdarktheme
 import os
+from iobt_options import default_enabled, default_offsets, default_misc_toggles, default_misc, tooltips_enabled, tooltips_misc_toggles, tooltips_misc
 import subprocess
+import psutil
+
 
 def process_exists(process_name):
     call = 'TASKLIST', '/FI', 'imagename eq %s' % process_name
@@ -17,19 +19,22 @@ def process_exists(process_name):
     # because Fail message could be translated
     return last_line.lower().startswith(process_name.lower())
 
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Virtual Desktop Body Tracking Configurator v1.7")
+        self.setWindowTitle("Virtual Desktop虚拟Tracker配置器 Github:mmyo456 v1.8C")
         
-        if process_exists("vrserver.exe"):
+        if "vrserver.exe" in (p.name() for p in psutil.process_iter()):
             dlg2 = QMessageBox()
-            dlg2.setWindowTitle("Virtual Desktop Body Tracking Configurator")            
-            dlg2.setText("Error!\n\nvrserver.exe running!\n\nPlease close SteamVR and try again")
+            dlg2.setWindowTitle("Virtual Desktop虚拟Tracker配置器 Github:mmyo456")            
+            dlg2.setText("错误!\n\nvrserver.exe 正在运行！\n\n请关闭 SteamVR 再试一次")
+
             dlg2.exec()
+
             if QMessageBox.StandardButton.Ok:
-                app.exit()
+                exit()
         
         self.steam = ""
         try:
@@ -37,17 +42,17 @@ class MainWindow(QMainWindow):
                 self.steam = json.load(file)["config"][0].replace("\\", "/")
         except Exception as e:
             dlg2 = QMessageBox()
-            dlg2.setWindowTitle("Virtual Desktop Body Tracking Configurator")            
-            dlg2.setText(f"Error: {e}")
+            dlg2.setWindowTitle("Virtual Desktop虚拟Tracker配置器")            
+            dlg2.setText(f"错误：{e}")
             dlg2.exec()
             if QMessageBox.StandardButton.Ok:
-                app.exit()
-      
+                exit()
+        
         self.checkboxes = {}
         self.offsets = {}   
         self.misc = {}
         self.stackedwidgets = {}
-        
+
         self.miscOpened = False
         
         layoutTab1 = QGridLayout()
@@ -60,10 +65,11 @@ class MainWindow(QMainWindow):
             button = QCheckBox(variable.replace("_", " ").title())
             button.setCheckable(True)
             button.setChecked(default_misc_toggles.get(variable))
-            button.setToolTip(tooltips_misc_toggles[variable])
-            self.misc[variable] = button
+            button.setToolTip(tooltips_misc_toggles[variable])   
+            self.misc[variable] = button      
             
             layoutTab3.addWidget(button)
+            
             
         for variable in default_misc:
             box = QDoubleSpinBox()
@@ -74,13 +80,12 @@ class MainWindow(QMainWindow):
                 box.setMaximum(5)    
             box.setSingleStep(0.05)
             box.setDecimals(3)
-            box.setValue(default_misc[variable])
-            box.setToolTip(tooltips_misc[variable])
+            box.setValue(default_misc[variable])   
+            box.setToolTip(tooltips_misc[variable])         
             self.misc[variable] = box
-            
-            layoutTab3.addWidget(box)  
 
-        
+            layoutTab3.addWidget(box)      
+
         spacer = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
         spacer2 = QSpacerItem(100, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
         spacer3 = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
@@ -89,72 +94,95 @@ class MainWindow(QMainWindow):
         layoutTab1.addItem(spacer3,1,0)
         self.layoutTab2.addItem(spacer2,0, 1)
         
-        self.upperWithHip = QPushButton("Upper Body (With Hip)")
+        self.upperWithHip = QPushButton("上半身（带臀部）")
         self.upperWithHip.setStyleSheet("QPushButton {background-color: rgb(180,230,255); color: black} QPushButton:hover {background-color: rgb(150,200,235)}")
         self.upperWithHip.clicked.connect(self.Upper_With_Hip_clicked)
         layoutTab1.addWidget(self.upperWithHip, 0, 0)
         
-        self.upper = QPushButton("Upper Body Only")
+        self.upper = QPushButton("仅上半身")
         self.upper.setStyleSheet("QPushButton {background-color: rgb(180,230,255); color: black} QPushButton:hover {background-color: rgb(150,200,235)}")
         self.upper.clicked.connect(self.upper_only_clicked)
         layoutTab1.addWidget(self.upper, 0, 1)
         
-        self.elbows = QPushButton("Elbows Only")
+        self.elbows = QPushButton("仅肘部")
         self.elbows.setStyleSheet("QPushButton {background-color: rgb(180,230,255); color: black} QPushButton:hover {background-color: rgb(150,200,235)}")
         self.elbows.clicked.connect(self.elbows_only_clicked)
         layoutTab1.addWidget(self.elbows, 0, 2)
         
-        self.defaults = QPushButton("Reset Enabled Trackers to Defaults")
+        self.defaults = QPushButton("重置已启用追踪器为默认设置")
         self.defaults.setStyleSheet("QPushButton {background-color: rgb(100,200,255); color: black} QPushButton:hover {background-color: rgb(70,150,230)}")
         self.defaults.clicked.connect(self.reset_clicked)
         layoutTab1.addWidget(self.defaults, 17, 0)
 
-        self.load = QPushButton("Load Current Settings")
+        self.load = QPushButton("加载当前设置")
         self.load.setStyleSheet("QPushButton {background-color: rgb(140,220,255); color: black} QPushButton:hover {background-color: rgb(130,190,235)}")
         self.load.clicked.connect(self.load_settings_clicked)
         layoutTab1.addWidget(self.load, 17, 1)
 
-        self.load2 = QPushButton("Load Current Settings")
+        self.load2 = QPushButton("加载当前设置")
         self.load2.setStyleSheet("QPushButton {background-color: rgb(140,220,255); color: black} QPushButton:hover {background-color: rgb(130,190,235)}")
         self.load2.clicked.connect(self.load_settings_clicked)
         self.layoutTab2.addWidget(self.load2, 3, 0)
 
-        self.load3 = QPushButton("Load Current Settings")
+        self.load3 = QPushButton("加载当前设置")
         self.load3.setStyleSheet("QPushButton {background-color: rgb(140,220,255); color: black} QPushButton:hover {background-color: rgb(130,190,235)}")
         self.load3.clicked.connect(self.load_settings_clicked)
         layoutTab3.addWidget(self.load3)
         
-        self.export = QPushButton("Apply Settings (All Pages)")
+        self.export = QPushButton("应用设置（所有页面）")
         self.export.setStyleSheet("QPushButton {background-color: rgb(60,250,60); color: black} QPushButton:hover {background-color: rgb(0,200,150)}")
         self.export.clicked.connect(self.export_clicked)
         layoutTab1.addWidget(self.export, 17, 2)
         
-        self.export2 = QPushButton("Apply Settings (All Pages)")
+        self.export2 = QPushButton("应用设置（所有页面）")
         self.export2.setStyleSheet("QPushButton {background-color: rgb(60,250,60); color: black} QPushButton:hover {background-color: rgb(0,200,150)}")
         self.export2.clicked.connect(self.export_clicked)
         self.layoutTab2.addWidget(self.export2, 4, 0)
         
-        self.export3 = QPushButton("Apply Settings (All Pages)")
+        self.export3 = QPushButton("应用设置（所有页面）")
         self.export3.setStyleSheet("QPushButton {background-color: rgb(60,250,60); color: black} QPushButton:hover {background-color: rgb(0,200,150)}")
         self.export3.clicked.connect(self.export_clicked)
         layoutTab3.addWidget(self.export3, 10)
+        
         
         first = 0
         row = 3
         column = 0
         for variable in default_enabled:
-            button = QCheckBox(variable[:-8].replace("_", " ").title())
+            Chinese = (variable[:-8].replace("_", " ").title())
+            Chinese = (Chinese.replace("Joint", " 关节点"))
+            Chinese = (Chinese.replace("Left", "左"))
+            Chinese = (Chinese.replace("Right", "右"))
+            Chinese = (Chinese.replace("Upper", "上侧"))
+            Chinese = (Chinese.replace("Middle", "中部"))
+            Chinese = (Chinese.replace("Lower", "下侧"))
+            Chinese = (Chinese.replace("Head", "头部"))
+            Chinese = (Chinese.replace("Neck", "颈部"))
+            Chinese = (Chinese.replace("Chest", "胸部"))
+            Chinese = (Chinese.replace("Spine", "脊柱"))
+            Chinese = (Chinese.replace("Hips", "臀部"))
+            Chinese = (Chinese.replace("Shoulder", "肩"))
+            Chinese = (Chinese.replace("Scapula", "肩胛骨"))
+            Chinese = (Chinese.replace("Arm", "手臂"))
+            Chinese = (Chinese.replace("Wrist", "腕"))
+            Chinese = (Chinese.replace("Twist", "扭转"))
+            Chinese = (Chinese.replace("Hand", "手"))
+            Chinese = (Chinese.replace("Leg", "腿"))
+            Chinese = (Chinese.replace("Ankle", "踝"))
+            Chinese = (Chinese.replace("Foot", "脚"))
+            Chinese = (Chinese.replace("Subtalar", "底面"))
+            Chinese = (Chinese.replace("Transverse", "横向"))
+            Chinese = (Chinese.replace("Ball", "球节"))
+            Chinese = (Chinese.replace(" ", ""))
+            button = QCheckBox(Chinese)
             button.setCheckable(True)
             button.setChecked(default_enabled.get(variable))
             button.setToolTip(tooltips_enabled[variable])
             button.clicked.connect(lambda checked, b=button: self.checkbox_interacted(b))
-            
             self.checkboxes[variable] = button
-            
             layoutTab1.addWidget(button, row, column)
             row += 1
             first += 1
-            
             if row >= 16 or first == 7:
                 row = 3
                 column += 1
@@ -162,52 +190,41 @@ class MainWindow(QMainWindow):
         widgetTab1 = QWidget()
         widgetTab1.setLayout(layoutTab1)
             
-            
         self.dropdown = QComboBox()
             
-        for axis in ["Translate X", "Translate Y", "Translate Z", "Rotate X", "Rotate Y", "Rotate Z"]:
+        for axis in ["平移 X", "平移 Y", "平移 Z", "旋转 X", "旋转 Y", "旋转 Z"]:
             self.stackedwidgets[axis] = QStackedWidget()
 
         row = 0
         column = 0
         for variable in default_enabled:        
-
             self.dropdown.addItem(variable[:-8].replace("_", " ").title())
-            
             self.offsets[variable] = {}
-            
-            for axis in ["Translate X", "Translate Y", "Translate Z", "Rotate X", "Rotate Y", "Rotate Z"]:
+            for axis in ["平移 X", "平移 Y", "平移 Z", "旋转 X", "旋转 Y", "旋转 Z"]:
                 box = QDoubleSpinBox()
                 box.setPrefix(f"{axis}: ")
-                
-                if axis[:-2] == "Rotate":
+                if axis[:-2] == "旋转":
                     box.setMaximum(360)
                     box.setMinimum(-360)
                     box.setSingleStep(90)
                     box.setValue(default_offsets[f"{variable[:-8]}_rot_{axis[-1].lower()}"])
-
                 else:
                     box.setSingleStep(0.01)
                     box.setMaximum(1)
                     box.setMinimum(-1)
                     box.setDecimals(3)  
-                    box.setValue(default_offsets[f"{variable[:-8]}_offset_{axis[-1].lower()}"])        
-                
+                    box.setValue(default_offsets[f"{variable[:-8]}_offset_{axis[-1].lower()}"])                   
                 self.offsets[variable][axis] = box
                 self.stackedwidgets[axis].addWidget(box)
-                #layoutTab2.addWidget(box, row, column)
-
                 row += 1
-                
                 if row >= 9:
                     row = 0
                     column += 1
 
-
         self.layoutTab2.addWidget(self.dropdown, 2, 0)
         
         i=1
-        for axis in ["Translate X", "Translate Y", "Translate Z", "Rotate X", "Rotate Y", "Rotate Z"]:
+        for axis in ["平移 X", "平移 Y", "平移 Z", "旋转 X", "旋转 Y", "旋转 Z"]:
             self.layoutTab2.addWidget(self.stackedwidgets[axis], i, 2)
             i+=1
         self.dropdown.currentIndexChanged.connect(self.offset_index_changed)
@@ -223,38 +240,36 @@ class MainWindow(QMainWindow):
         tabs.setTabPosition(QTabWidget.TabPosition.North)
         tabs.setMovable(True)
 
-        tabs.addTab(widgetTab1, "Enabled Trackers")
-        tabs.addTab(widgetTab2, "Tracker Offsets")
-        tabs.addTab(widgetTab3, "Miscellaneous")
+        tabs.addTab(widgetTab1, "启用追踪器")
+        tabs.addTab(widgetTab2, "追踪器偏移")
+        tabs.addTab(widgetTab3, "其他设置")
 
         self.setCentralWidget(tabs)
 
+        
     def tabChanged(self, index: int):
         if not self.miscOpened and index == 2:
             dlg3 = QMessageBox()
-            dlg3.setWindowTitle("Virtual Desktop Body Tracking Configurator")            
-            dlg3.setText(f"Do NOT modify miscellaneous options if you do not understand them!")
+            dlg3.setWindowTitle("Virtual Desktop虚拟Tracker配置器 Github:mmyo456")            
+            dlg3.setText(f"如果不了解其他选项，请勿修改！")
             dlg3.exec()
             self.miscOpened = True 
           
     def offset_index_changed(self, index):
         i=1
-        for axis in ["Translate X", "Translate Y", "Translate Z", "Rotate X", "Rotate Y", "Rotate Z"]:
+        for axis in ["平移 X", "平移 Y", "平移 Z", "旋转 X", "旋转 Y", "旋转 Z"]:
             self.stackedwidgets[axis].setCurrentIndex(index)
             i+=1
                 
     def checkbox_interacted(self, checkbox):
         ()
-        #print(f"{checkbox.text()} is {checkbox.isChecked()}")
      
     def reset_clicked(self):
-        #print("Reset Defaults clicked")
         for variable, checkbox in self.checkboxes.items():
             default_state = default_enabled.get(variable, False)
             checkbox.setChecked(default_state)
         
     def Upper_With_Hip_clicked(self):
-        #print("Upper With Hip clicked")
         for variable, checkbox in self.checkboxes.items():
             if variable == "left_arm_upper_joint_enabled" or variable == "left_arm_lower_joint_enabled" or variable == "right_arm_upper_joint_enabled" or variable == "right_arm_lower_joint_enabled" or variable == "chest_joint_enabled" or variable == "hips_joint_enabled":
                 checkbox.setChecked(True)
@@ -262,7 +277,6 @@ class MainWindow(QMainWindow):
                 checkbox.setChecked(False) 
 
     def upper_only_clicked(self):
-        #print("Upper Only clicked")
         for variable, checkbox in self.checkboxes.items():
             if variable == "left_arm_upper_joint_enabled" or variable == "left_arm_lower_joint_enabled" or variable == "right_arm_upper_joint_enabled" or variable == "right_arm_lower_joint_enabled" or variable == "chest_joint_enabled":
                 checkbox.setChecked(True)
@@ -270,7 +284,6 @@ class MainWindow(QMainWindow):
                 checkbox.setChecked(False)
         
     def elbows_only_clicked(self):
-        #print("Elbows Only clicked")
         for variable, checkbox in self.checkboxes.items():
             if variable == "left_arm_upper_joint_enabled" or variable == "left_arm_lower_joint_enabled" or variable == "right_arm_upper_joint_enabled" or variable == "right_arm_lower_joint_enabled":
                 checkbox.setChecked(True)
@@ -289,9 +302,9 @@ class MainWindow(QMainWindow):
                         ()
                     
                 for variable in default_enabled:
-                    for axis in ["Translate X", "Translate Y", "Translate Z", "Rotate X", "Rotate Y", "Rotate Z"]:
+                    for axis in ["平移 X", "平移 Y", "平移 Z", "旋转 X", "旋转 Y", "旋转 Z"]:
                         try:                
-                            if axis[:-2] == "Rotate":
+                            if axis[:-2] == "旋转":
                                 self.offsets[variable][axis].setValue(current[f"{variable[:-8]}_rot_{axis[-1].lower()}"])
                             else:
                                 self.offsets[variable][axis].setValue(current[f"{variable[:-8]}_offset_{axis[-1].lower()}"])
@@ -315,31 +328,25 @@ class MainWindow(QMainWindow):
                 ()
             else:
                 dlg2 = QMessageBox()
-                dlg2.setWindowTitle("Virtual Desktop Body Tracking Configurator")            
-                dlg2.setText(f"Error: {e}")
-                
+                dlg2.setWindowTitle("Virtual Desktop虚拟Tracker配置器 mmyo456")            
+                dlg2.setText(f"错误：{e}")
                 dlg2.exec()
-                
                 if QMessageBox.StandardButton.Ok:
-                    app.exit()
-
-        
-            
-
+                    exit()
         
     def export_clicked(self):
-
-        if process_exists("vrserver.exe"):
+        if "vrserver.exe" in (p.name() for p in psutil.process_iter()):
             dlg2 = QMessageBox()
-            dlg2.setWindowTitle("Virtual Desktop Body Tracking Configurator")            
-            dlg2.setText("Error!\n\nvrserver.exe running!\n\nPlease close SteamVR and try again")
-            dlg2.exec()
-            if QMessageBox.StandardButton.Ok:
-                app.exit()
-        
+            dlg2.setWindowTitle("Virtual Desktop虚拟Tracker配置器 Github:mmyo456")            
+            dlg2.setText("错误!\n\nvrserver.exe 正在运行！\n\n请关闭 SteamVR 再试一次")
 
-        #print("Export clicked")
+            dlg2.exec()
+
+            if QMessageBox.StandardButton.Ok:
+                exit()
+        
         export_dict = {}
+
                 
         for variable, checkbox in self.checkboxes.items():
            if default_enabled[variable] != checkbox.isChecked():
@@ -347,7 +354,7 @@ class MainWindow(QMainWindow):
            
         for variable, joint in self.offsets.items():
             for axis, box in joint.items():
-                if axis[:-2] == "Rotate":
+                if axis[:-2] == "旋转":
                     try:
                         if abs(box.value() - default_offsets[f"{variable[:-8]}_rot_{axis[-1].lower()}"]) < 0.001:
                             ()
@@ -377,11 +384,7 @@ class MainWindow(QMainWindow):
                     export_dict[variable] = input.isChecked()
             except:
                 ()
-            
            
-        # with open("output.json", "w", encoding="utf-8", errors='ignore') as outfile:
-        #     json.dump(export_dict, indent=2, fp=outfile)
-                
         try:   
             with open(f"{self.steam}/steamvr.vrsettings", "r+", encoding="utf-8", errors='ignore') as settings:
                 
@@ -401,31 +404,25 @@ class MainWindow(QMainWindow):
                     ()
                 
                 temp["driver_VirtualDesktop"] = export_dict
-                #print(temp)
                 settings.seek(0)
                 json.dump(temp, indent=3, fp=settings)
                 settings.truncate()
                 settings.close()
                 
                 dlg = QMessageBox(self)
-                dlg.setWindowTitle("Virtual Desktop Body Tracking Configurator")            
-                dlg.setText(f"Successfully exported to SteamVR!\n\nBackup of original is saved at: {self.steam}/steamvr.vrsettings.originalbackup\n\nAnd backup of previous settings is saved at: {self.steam}/steamvr.vrsettings.lastbackup")
-                
+                dlg.setWindowTitle("Virtual Desktop虚拟Tracker配置器")            
+                dlg.setText(f"成功导出到 SteamVR！\n\n原始设置备份保存在：{self.steam}/steamvr.vrsettings.originalbackup\n\n之前设置的备份保存在： {self.steam}/steamvr.vrsettings.lastbackup")
                 dlg.exec()
-                
                 if QMessageBox.StandardButton.Ok:
                     app.exit()
 
         except Exception as e:
             dlg = QMessageBox(self)
-            dlg.setWindowTitle("Virtual Desktop Body Tracking Configurator")            
-            dlg.setText(f"Error: {e}")
-            
+            dlg.setWindowTitle("Virtual Desktop虚拟Tracker配置器")            
+            dlg.setText(f"错误：{e}")
             dlg.exec()
-            
             if QMessageBox.StandardButton.Ok:
                 app.exit()
-            
 
 app = QApplication([])
 
@@ -435,4 +432,3 @@ window = MainWindow()
 window.show()
 
 app.exec()
-
